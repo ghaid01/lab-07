@@ -15,6 +15,7 @@ server.use( cors() );
 
 server.get('/location', locationHandler);
 server.get('/weather', weatherHandler);
+server.get('/events', eventsHadler);
 
 function locationHandler(req,res) {
   // Query String = ?a=b&c=d
@@ -70,10 +71,35 @@ function Weather(day) {
   this.time = new Date(day.time * 1000).toDateString();
 }
 
+function eventsHandler(req,res){
+  getEvent(req.query.data)
+  .then( eventData => res.status(200).json(eventData) );
+
+}
+function getEvent(query) {
+  // let data = require('./data/darksky.json');
+  const url = `http://api.eventful.com/json/events/search?app_key=${process.env.API_EVENT_KEY}&location=${city}`;
+  return superagent.get(url)
+    .then( data => {
+      let event = JSON.parse(data.text)
+      return event.events.event.map( (day) => {
+        return new Event(day);
+      });
+    });
+}
+
+function Event(day){
+  "link" = day.url,
+  "name"= day.title,
+  "event_date"= day.start_time,
+  "summary"= day.description
+}
+
+
 
 server.use('*', (req,res) => {
   // This is a comment
-  res.status(404).send('haahhhhh?');
+  res.status(404).send('batta?');
 });
 
 server.listen( PORT, () => console.log('hello world', PORT));
